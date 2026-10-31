@@ -1,0 +1,6 @@
+{
+  "appId": "com.surahyaseen.app",
+  "appName": "Surah Yaseen",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
