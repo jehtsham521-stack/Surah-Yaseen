@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Custom Islamic Calligraphy and Localization Fonts */
+@layer base {
+  :root {
+    --font-quran-amiri: 'Amiri', serif;
+    --font-quran-scheherazade: 'Scheherazade New', serif;
+    --font-urdu: 'Noto Nastaliq Urdu', serif;
+    --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+}
+
+.font-amiri {
+  font-family: 'Amiri', serif;
+}
+
+.font-scheherazade {
+  font-family: 'Scheherazade New', serif;
+}
+
+.font-urdu {
+  font-family: 'Noto Nastaliq Urdu', serif;
+  line-height: 2.2;
+}
+
+.font-app {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+/* Sepia / Mushaf Paper Theme */
+.theme-sepia {
+  background-color: #fbf7ee;
+  color: #2c2518;
+}
+
+.theme-sepia .card-surface {
+  background-color: #f4ecdc;
+  border-color: #e3d5be;
+}
+
+.theme-sepia .card-surface-highlight {
+  background-color: #ede2cd;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.45);
+}
+
+/* Tajweed Rule Highlights */
+.tajweed-ghunnah {
+  color: #059669; /* Emerald */
+  font-weight: 700;
+}
+.tajweed-ikhfa {
+  color: #d97706; /* Amber */
+  font-weight: 700;
+}
+.tajweed-idgham {
+  color: #2563eb; /* Blue */
+  font-weight: 700;
+}
+.tajweed-qalqalah {
+  color: #dc2626; /* Red */
+  font-weight: 700;
+}
+.tajweed-madd {
+  color: #7c3aed; /* Purple */
+  font-weight: 700;
+}
+
+/* Quran text leading and rendering */
+.quran-verse-text {
+  direction: rtl;
+  text-align: right;
+  line-height: 2.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}

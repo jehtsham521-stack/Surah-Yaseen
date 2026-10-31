@@ -1,0 +1,6 @@
+{
+  "name": "Surah Yaseen",
+  "description": "Comprehensive Quranic learning app for Surah Yaseen with authentic word-by-word analysis, Arabic grammar (Sarf & Nahw), Urdu and English translations, verse-by-verse audio, Tajweed rules, and memorization tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
