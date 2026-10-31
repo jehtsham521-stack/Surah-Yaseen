@@ -13,6 +13,7 @@ import {
   Sliders,
   ChevronUp,
   ChevronDown,
+  Timer,
 } from 'lucide-react';
 
 interface AudioPlayerProps {
@@ -40,8 +41,19 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const [sleepTimerMinutes, setSleepTimerMinutes] = useState<number | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Sleep timer countdown effect
+  useEffect(() => {
+    if (!sleepTimerMinutes || !isPlaying) return;
+    const timeout = setTimeout(() => {
+      onPlayPauseToggle(false);
+      setSleepTimerMinutes(null);
+    }, sleepTimerMinutes * 60 * 1000);
+    return () => clearTimeout(timeout);
+  }, [sleepTimerMinutes, isPlaying, onPlayPauseToggle]);
 
   const audioUrl = getAyahAudioUrl(currentAyahNumber, selectedReciter);
 
@@ -244,6 +256,25 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
               title="Auto-Scroll to verse as it plays"
             >
               Auto-Scroll: {autoScroll ? 'ON' : 'OFF'}
+            </button>
+
+            {/* Sleep Timer */}
+            <button
+              onClick={() => {
+                if (sleepTimerMinutes === null) setSleepTimerMinutes(15);
+                else if (sleepTimerMinutes === 15) setSleepTimerMinutes(30);
+                else if (sleepTimerMinutes === 30) setSleepTimerMinutes(60);
+                else setSleepTimerMinutes(null);
+              }}
+              className={`px-2 py-1 text-xs font-semibold rounded-md transition hidden sm:flex items-center gap-1 ${
+                sleepTimerMinutes !== null
+                  ? 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200 border border-amber-300 dark:border-amber-700'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+              title="Sleep Timer (Stop playback automatically)"
+            >
+              <Timer className="w-3.5 h-3.5" />
+              <span className="text-[11px]">{sleepTimerMinutes ? `${sleepTimerMinutes}m` : 'Timer'}</span>
             </button>
 
             {/* Reciter Selector Dropdown */}

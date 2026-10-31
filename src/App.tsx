@@ -20,6 +20,10 @@ import { BookmarksNotesDrawer } from './components/BookmarksNotesDrawer';
 import { SettingsDrawer } from './components/SettingsDrawer';
 import { NoteModal } from './components/NoteModal';
 import { InstallAppModal } from './components/InstallAppModal';
+import { SplashScreen } from './components/SplashScreen';
+import { TasbihModal } from './components/TasbihModal';
+import { MushafView } from './components/MushafView';
+import { usePWAInstall } from './hooks/usePWAInstall';
 import {
   Search,
   X,
@@ -36,6 +40,8 @@ import {
 } from 'lucide-react';
 
 export default function App() {
+  const { isInstalled } = usePWAInstall();
+
   // Theme state
   const [theme, setTheme] = useState<ThemeMode>(() => {
     return (localStorage.getItem('yaseen_theme') as ThemeMode) || 'light';
@@ -88,7 +94,13 @@ export default function App() {
     }
   });
 
-  // Modals state
+  // Modals & New Features state
+  const [showSplash, setShowSplash] = useState<boolean>(() => {
+    // Show splash screen on launch
+    return true;
+  });
+  const [readingMode, setReadingMode] = useState<'study' | 'mushaf'>('study');
+  const [isTasbihOpen, setIsTasbihOpen] = useState<boolean>(false);
   const [selectedWord, setSelectedWord] = useState<{ word: QuranWord; ayahNum: number } | null>(null);
   const [isTajweedOpen, setIsTajweedOpen] = useState<boolean>(false);
   const [isHifzOpen, setIsHifzOpen] = useState<boolean>(false);
@@ -231,6 +243,7 @@ export default function App() {
         onOpenBookmarks={() => setIsBookmarksOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenInstallModal={() => setIsInstallModalOpen(true)}
+        onOpenTasbih={() => setIsTasbihOpen(true)}
         bookmarksCount={bookmarks.length}
       />
 
@@ -307,134 +320,190 @@ export default function App() {
               </button>
 
               <button
-                onClick={() => setIsInstallModalOpen(true)}
-                className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 shadow-xs transition flex items-center gap-1.5"
+                onClick={() => setIsTasbihOpen(true)}
+                className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-900/80 text-emerald-100 hover:bg-emerald-800 border border-emerald-700/60 transition flex items-center gap-1.5"
               >
-                <Download className="w-3.5 h-3.5" />
-                Install App
+                <span className="text-xs">📿</span>
+                Digital Tasbih
               </button>
+
+              {!isInstalled && (
+                <button
+                  onClick={() => setIsInstallModalOpen(true)}
+                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 shadow-xs transition flex items-center gap-1.5"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Install App
+                </button>
+              )}
+            </div>
+
+            {/* Reading Mode Switcher (Study Mode vs Mushaf Page) */}
+            <div className="pt-2 flex items-center justify-center">
+              <div className="bg-emerald-950/60 p-1 rounded-xl border border-emerald-700/50 flex items-center gap-1 text-xs font-semibold">
+                <button
+                  onClick={() => setReadingMode('study')}
+                  className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${
+                    readingMode === 'study'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'text-emerald-200 hover:text-white'
+                  }`}
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  Study Mode (ترجمہ و قواعد)
+                </button>
+
+                <button
+                  onClick={() => setReadingMode('mushaf')}
+                  className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${
+                    readingMode === 'mushaf'
+                      ? 'bg-amber-400 text-emerald-950 font-bold shadow-xs'
+                      : 'text-emerald-200 hover:text-white'
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Mushaf Mode (مسلسل تلاوت)
+                </button>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Search & Navigation Bar */}
-        <section id="verses" className="space-y-3">
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search Arabic, Urdu translation, English, or Ayah number (e.g. 'wisdom', '36')..."
-              className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-3 top-1/2 -translate-y-1/2"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-
-          {/* Ruku Selector Tabs (Segmented Control) */}
-          <div className="flex items-center gap-1 overflow-x-auto pb-1">
-            <button
-              onClick={() => setSelectedRuku('all')}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition whitespace-nowrap ${
-                selectedRuku === 'all'
-                  ? 'bg-emerald-700 text-white shadow-xs'
-                  : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              All Verses (83)
-            </button>
-            {[1, 2, 3, 4, 5].map((rukuNum) => (
-              <button
-                key={rukuNum}
-                onClick={() => setSelectedRuku(rukuNum)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition whitespace-nowrap ${
-                  selectedRuku === rukuNum
-                    ? 'bg-emerald-700 text-white shadow-xs'
-                    : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                Ruku {rukuNum}
-              </button>
-            ))}
-          </div>
-
-          {/* Result Count Status */}
-          {searchQuery && (
-            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-1">
-              <span>Found {filteredAyahs.length} matching verses</span>
-              <button
-                onClick={() => setSearchQuery('')}
-                className="text-emerald-700 dark:text-emerald-400 font-semibold hover:underline"
-              >
-                Clear Search
-              </button>
-            </div>
-          )}
-        </section>
-
-        {/* Verses List */}
-        <section className="space-y-4">
-          {filteredAyahs.length === 0 ? (
-            <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 space-y-3">
-              <Search className="w-10 h-10 mx-auto text-slate-400" />
-              <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200">
-                No verses found matching "{searchQuery}"
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-                Try searching for words like "قلب", "رسول", "حکمت", "رحمت", or enter any verse number from 1 to 83.
-              </p>
-              <button
-                onClick={() => setSearchQuery('')}
-                className="px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-700 text-white hover:bg-emerald-800 transition"
-              >
-                Show All Verses
-              </button>
-            </div>
-          ) : (
-            filteredAyahs.map((ayah) => {
-              const isBookmarked = bookmarks.some((b) => b.ayahNumber === ayah.number);
-              const noteItem = notes.find((n) => n.ayahNumber === ayah.number);
-
-              return (
-                <AyahCard
-                  key={ayah.number}
-                  ayah={ayah}
-                  isActive={activeAyahNumber === ayah.number}
-                  isPlaying={isPlaying}
-                  isBookmarked={isBookmarked}
-                  hasNote={!!noteItem}
-                  arabicFontSize={arabicFontSize}
-                  translationFontSize={translationFontSize}
-                  arabicFontFamily={arabicFontFamily}
-                  showUrdu={showUrdu}
-                  showEnglish={showEnglish}
-                  showWordByWord={showWordByWord}
-                  showTajweed={showTajweed}
-                  urduTranslator={urduTranslator}
-                  englishTranslator={englishTranslator}
-                  onPlayAyah={(num) => {
-                    if (activeAyahNumber === num && isPlaying) {
-                      setIsPlaying(false);
-                    } else {
-                      setActiveAyahNumber(num);
-                      setIsPlaying(true);
-                    }
-                  }}
-                  onToggleBookmark={handleToggleBookmark}
-                  onOpenNoteModal={(num) => setNoteAyahTarget(num)}
-                  onSelectWord={(word, ayahNum) => setSelectedWord({ word, ayahNum })}
+        {/* Mode Content: Either Mushaf Mode or Study Mode */}
+        {readingMode === 'mushaf' ? (
+          <MushafView
+            ayahs={SURAH_YASEEN_AYAHS}
+            activeAyahNumber={activeAyahNumber}
+            arabicFontSize={arabicFontSize}
+            arabicFontFamily={arabicFontFamily}
+            onSelectAyah={(num) => {
+              setActiveAyahNumber(num);
+              setIsPlaying(true);
+            }}
+            showTajweed={showTajweed}
+          />
+        ) : (
+          <>
+            {/* Search & Navigation Bar */}
+            <section id="verses" className="space-y-3">
+              <div className="relative">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search Arabic, Urdu translation, English, or Ayah number (e.g. 'wisdom', '36')..."
+                  className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
                 />
-              );
-            })
-          )}
-        </section>
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 absolute right-3 top-1/2 -translate-y-1/2"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Ruku Selector Tabs (Segmented Control) */}
+              <div className="flex items-center gap-1 overflow-x-auto pb-1">
+                <button
+                  onClick={() => setSelectedRuku('all')}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition whitespace-nowrap ${
+                    selectedRuku === 'all'
+                      ? 'bg-emerald-700 text-white shadow-xs'
+                      : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  All Verses (83)
+                </button>
+                {[1, 2, 3, 4, 5].map((rukuNum) => (
+                  <button
+                    key={rukuNum}
+                    onClick={() => setSelectedRuku(rukuNum)}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition whitespace-nowrap ${
+                      selectedRuku === rukuNum
+                        ? 'bg-emerald-700 text-white shadow-xs'
+                        : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    Ruku {rukuNum}
+                  </button>
+                ))}
+              </div>
+
+              {/* Result Count Status */}
+              {searchQuery && (
+                <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-1">
+                  <span>Found {filteredAyahs.length} matching verses</span>
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="text-emerald-700 dark:text-emerald-400 font-semibold hover:underline"
+                  >
+                    Clear Search
+                  </button>
+                </div>
+              )}
+            </section>
+
+            {/* Verses List */}
+            <section className="space-y-4">
+              {filteredAyahs.length === 0 ? (
+                <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 space-y-3">
+                  <Search className="w-10 h-10 mx-auto text-slate-400" />
+                  <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200">
+                    No verses found matching "{searchQuery}"
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                    Try searching for words like "قلب", "رسول", "حکمت", "رحمت", or enter any verse number from 1 to 83.
+                  </p>
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-700 text-white hover:bg-emerald-800 transition"
+                  >
+                    Show All Verses
+                  </button>
+                </div>
+              ) : (
+                filteredAyahs.map((ayah) => {
+                  const isBookmarked = bookmarks.some((b) => b.ayahNumber === ayah.number);
+                  const noteItem = notes.find((n) => n.ayahNumber === ayah.number);
+
+                  return (
+                    <AyahCard
+                      key={ayah.number}
+                      ayah={ayah}
+                      isActive={activeAyahNumber === ayah.number}
+                      isPlaying={isPlaying}
+                      isBookmarked={isBookmarked}
+                      hasNote={!!noteItem}
+                      arabicFontSize={arabicFontSize}
+                      translationFontSize={translationFontSize}
+                      arabicFontFamily={arabicFontFamily}
+                      showUrdu={showUrdu}
+                      showEnglish={showEnglish}
+                      showWordByWord={showWordByWord}
+                      showTajweed={showTajweed}
+                      urduTranslator={urduTranslator}
+                      englishTranslator={englishTranslator}
+                      onPlayAyah={(num) => {
+                        if (activeAyahNumber === num && isPlaying) {
+                          setIsPlaying(false);
+                        } else {
+                          setActiveAyahNumber(num);
+                          setIsPlaying(true);
+                        }
+                      }}
+                      onToggleBookmark={handleToggleBookmark}
+                      onOpenNoteModal={(num) => setNoteAyahTarget(num)}
+                      onSelectWord={(word, ayahNum) => setSelectedWord({ word, ayahNum })}
+                    />
+                  );
+                })
+              )}
+            </section>
+          </>
+        )}
       </main>
 
       {/* Sticky Bottom Audio Player */}
@@ -539,6 +608,25 @@ export default function App() {
         isOpen={isInstallModalOpen}
         onClose={() => setIsInstallModalOpen(false)}
       />
+
+      {/* Digital Tasbih Counter Modal */}
+      <TasbihModal
+        isOpen={isTasbihOpen}
+        onClose={() => setIsTasbihOpen(false)}
+      />
+
+      {/* Intro Welcome / Splash Screen */}
+      {showSplash && (
+        <SplashScreen
+          lastReadAyah={activeAyahNumber}
+          onEnterApp={(targetNum) => {
+            if (targetNum) {
+              setActiveAyahNumber(targetNum);
+            }
+            setShowSplash(false);
+          }}
+        />
+      )}
     </div>
   );
 }

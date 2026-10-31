@@ -9,6 +9,7 @@ interface TopNavProps {
   onOpenBookmarks: () => void;
   onOpenSettings: () => void;
   onOpenInstallModal: () => void;
+  onOpenTasbih?: () => void;
   bookmarksCount: number;
 }
 
@@ -19,6 +20,7 @@ export const TopNav: React.FC<TopNavProps> = ({
   onOpenBookmarks,
   onOpenSettings,
   onOpenInstallModal,
+  onOpenTasbih,
   bookmarksCount,
 }) => {
   const { isInstallable, isInstalled, install } = usePWAInstall();
@@ -35,8 +37,8 @@ export const TopNav: React.FC<TopNavProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
-      <div className="max-w-6xl mx-auto flex items-center justify-between gap-8 px-4 md:px-6 py-3.5">
+    <header className="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 pt-[env(safe-area-inset-top,0px)]">
+      <div className="max-w-6xl mx-auto flex items-center justify-between gap-3 md:gap-8 px-4 md:px-6 py-2.5 md:py-3.5">
         {/* Zone 1: Single text element wordmark */}
         <a
           href="#"
@@ -74,6 +76,14 @@ export const TopNav: React.FC<TopNavProps> = ({
           >
             Virtues & Rukus
           </button>
+          {onOpenTasbih && (
+            <button
+              onClick={onOpenTasbih}
+              className="hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors whitespace-nowrap shrink-0 cursor-pointer flex items-center gap-1"
+            >
+              <span>📿</span> Tasbih
+            </button>
+          )}
           <button
             onClick={onOpenBookmarks}
             className="hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors whitespace-nowrap shrink-0 cursor-pointer flex items-center gap-1"
@@ -82,26 +92,39 @@ export const TopNav: React.FC<TopNavProps> = ({
           </button>
         </nav>
 
-        {/* Zone 3: 1 primary action */}
-        <div className="flex items-center gap-2 shrink-0">
+        {/* Zone 3: Actions */}
+        <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
+          {/* Quick Tasbih trigger for mobile */}
+          {onOpenTasbih && (
+            <button
+              onClick={onOpenTasbih}
+              className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer text-xs flex items-center gap-1"
+              title="Digital Tasbih Counter"
+            >
+              <span>📿</span>
+            </button>
+          )}
+
           {/* Quick Settings trigger */}
           <button
             onClick={onOpenSettings}
-            className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
             title="Settings & Font Controls"
           >
             <Sliders className="w-4 h-4" />
           </button>
 
-          {/* Primary Action Button: Install App */}
-          <button
-            onClick={handleInstallClick}
-            className="px-3.5 py-2 text-xs font-semibold text-white bg-emerald-700 rounded-lg hover:bg-emerald-800 transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95"
-            title="Install App on Phone"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Install App</span>
-          </button>
+          {/* Primary Action Button: Install App (Hidden automatically once app is installed) */}
+          {!isInstalled && (
+            <button
+              onClick={handleInstallClick}
+              className="px-2.5 py-1.5 md:px-3.5 md:py-2 text-xs font-semibold text-white bg-emerald-700 rounded-lg hover:bg-emerald-800 transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95"
+              title="Install App on Phone"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Install App</span>
+            </button>
+          )}
         </div>
       </div>
     </header>
